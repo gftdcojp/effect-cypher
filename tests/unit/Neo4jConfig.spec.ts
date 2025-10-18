@@ -58,6 +58,69 @@ describe("Neo4jConfig", () => {
 			expect(result.user).toBe("testuser");
 		});
 
+		it("should throw error for invalid config type", () => {
+			expect(() => validateConfig("invalid")).toThrow("config must be an object");
+			expect(() => validateConfig(null)).toThrow("config must be an object");
+			expect(() => validateConfig(undefined)).toThrow("config must be an object");
+		});
+
+		it("should throw error for missing url", () => {
+			const config = {
+				user: "neo4j",
+				password: "password",
+			};
+
+			expect(() => validateConfig(config)).toThrow("url is required and must be a string");
+		});
+
+		it("should throw error for invalid url type", () => {
+			const config = {
+				url: 123,
+				user: "neo4j",
+				password: "password",
+			};
+
+			expect(() => validateConfig(config)).toThrow("url is required and must be a string");
+		});
+
+		it("should throw error for missing user", () => {
+			const config = {
+				url: "neo4j://localhost:7687",
+				password: "password",
+			};
+
+			expect(() => validateConfig(config)).toThrow("user is required and must be a string");
+		});
+
+		it("should throw error for invalid user type", () => {
+			const config = {
+				url: "neo4j://localhost:7687",
+				user: 123,
+				password: "password",
+			};
+
+			expect(() => validateConfig(config)).toThrow("user is required and must be a string");
+		});
+
+		it("should throw error for missing password", () => {
+			const config = {
+				url: "neo4j://localhost:7687",
+				user: "neo4j",
+			};
+
+			expect(() => validateConfig(config)).toThrow("password is required and must be a string");
+		});
+
+		it("should throw error for invalid password type", () => {
+			const config = {
+				url: "neo4j://localhost:7687",
+				user: "neo4j",
+				password: 123,
+			};
+
+			expect(() => validateConfig(config)).toThrow("password is required and must be a string");
+		});
+
 		it("should accept negative timeout for now", () => {
 			const config = {
 				url: "neo4j://localhost:7687",
