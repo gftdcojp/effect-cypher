@@ -45,7 +45,7 @@ export const runQuery = async <A>(
 				}
 				throw new ValidationError(
 					"Failed to decode query result",
-					decodeError,
+					decodeError as unknown,
 					"decoder",
 					record.get(0),
 				);

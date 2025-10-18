@@ -43,6 +43,7 @@ describe("CypherService", () => {
 			expect(mockSession.run).toHaveBeenCalledWith("MATCH (n) RETURN n", {});
 			expect(mockRecord.get).toHaveBeenCalledWith(0);
 			expect(result).toEqual([rawData]);
+			expect(result).toHaveLength(1);
 		});
 
 		it("should handle null/undefined data with validation error", async () => {
@@ -65,15 +66,15 @@ describe("CypherService", () => {
 			mockRecord.get.mockReturnValue(rawData);
 			mockSession.run.mockResolvedValue(mockResult);
 
-			// Mock a decoder that throws ValidationError
-			const decoder = vi.fn().mockImplementation(() => {
-				throw new ValidationError("Decode failed", undefined, "decoder", rawData);
+			// Create a decoder that will fail
+			const decoder = Schema.Struct({
+				id: Schema.Number, // This will fail because rawData.id is a string, not number
 			});
 
 			await expect(runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder))
 				.rejects.toThrow(ValidationError);
 			await expect(runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder))
-				.rejects.toThrow("Decode failed");
+				.rejects.toThrow("Failed to decode query result");
 		});
 
 		it("should handle session run errors", async () => {
@@ -103,15 +104,17 @@ describe("CypherService", () => {
 	describe("runQuerySingle", () => {
 		it("should return single result", async () => {
 			const rawData = { id: "test", name: "Test User" };
-			const decodedData = { id: "decoded", name: "Decoded User" };
 			mockRecord.get.mockReturnValue(rawData);
 			mockSession.run.mockResolvedValue(mockResult);
 
-			const decoder = vi.fn().mockReturnValue(decodedData);
+			const decoder = Schema.Struct({
+				id: Schema.String,
+				name: Schema.String,
+			});
 
 			const result = await runQuerySingle(mockSession, "MATCH (n) RETURN n LIMIT 1", {}, decoder);
 
-			expect(result).toEqual(decodedData);
+			expect(result).toEqual(rawData);
 		});
 
 		it("should throw error for no results", async () => {
@@ -128,10 +131,15 @@ describe("CypherService", () => {
 
 
 		it("should throw error for multiple results", async () => {
+			const rawData = { id: "test", name: "Test User" };
+			mockRecord.get.mockReturnValue(rawData);
 			const multiResult = { records: [mockRecord, mockRecord] };
 			mockSession.run.mockResolvedValue(multiResult);
 
-			const decoder = vi.fn();
+			const decoder = Schema.Struct({
+				id: Schema.String,
+				name: Schema.String,
+			});
 
 			await expect(runQuerySingle(mockSession, "MATCH (n) RETURN n", {}, decoder))
 				.rejects.toThrow(QueryError);
