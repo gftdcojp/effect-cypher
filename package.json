@@ -1,5 +1,5 @@
 {
-	"name": "effect-cypher",
+	"name": "@gftdcojp/effect-cypher",
 	"version": "0.1.0",
 	"description": "Type-safe, monadic Neo4j client using Effect and Cypher Builder",
 	"main": "dist/index.js",
@@ -58,7 +58,8 @@
 		"url": "https://github.com/gftdcojp/effect-cypher/issues"
 	},
 	"publishConfig": {
-		"access": "public"
+		"access": "public",
+		"registry": "https://npm.pkg.github.com"
 	},
 	"files": ["dist", "README.md", "LICENSE"]
 }
