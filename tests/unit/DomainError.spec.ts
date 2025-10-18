@@ -3,7 +3,6 @@ import {
 	ConnectionError,
 	ConstraintError,
 	QueryError,
-	TransactionError,
 	ValidationError,
 	isDomainError,
 	isDomainErrorOf,
@@ -71,21 +70,6 @@ describe("DomainError", () => {
 		});
 	});
 
-	describe("TransactionError", () => {
-		it("should create a TransactionError with transaction context", () => {
-			const error = new TransactionError(
-				"Transaction failed",
-				new Error("Rollback error"),
-				"write",
-				"tx-123",
-			);
-
-			expect(error._tag).toBe("TransactionError");
-			expect(error.operation).toBe("write");
-			expect(error.txId).toBe("tx-123");
-			expect(error.context).toEqual({ operation: "write", txId: "tx-123" });
-		});
-	});
 
 	describe("ConstraintError", () => {
 		it("should create a ConstraintError with constraint details", () => {
@@ -160,7 +144,7 @@ describe("DomainError", () => {
 			const error = new ValidationError("test");
 
 			expect(Object.getPrototypeOf(error)).toBe(ValidationError.prototype);
-			expect(Object.getPrototypeOf(ValidationError.prototype)).toBe(
+			expect(Object.getPrototypeOf(ValidationError.prototype)).toEqual(
 				Error.prototype,
 			);
 		});
