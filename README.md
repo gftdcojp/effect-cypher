@@ -1,21 +1,20 @@
 # effect-cypher
 
-**Type-safe, monadic Neo4j client using Effect and Cypher Builder**
+**Type-safe Neo4j client with Effect integration**
 
 [![npm version](https://badge.fury.io/js/effect-cypher.svg)](https://badge.fury.io/js/effect-cypher)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A modern, type-safe Neo4j client that leverages the power of [Effect](https://effect.website/) for composable, observable side effects and [@neo4j/cypher-builder](https://github.com/neo4j/cypher-builder) for safe Cypher query construction.
+A modern, type-safe Neo4j client that provides composable query building and execution with comprehensive error handling and resource management.
 
 ## ✨ Features
 
 - **Type Safety**: Full TypeScript support with compile-time guarantees
-- **Effect Integration**: Monadic error handling and composable side effects
-- **Schema Validation**: Runtime type validation using effect/Schema
-- **Safe Query Building**: Parameterized Cypher queries with @neo4j/cypher-builder
+- **Promise-based API**: Simple, modern async/await interface
+- **Safe Query Building**: Parameterized Cypher queries with type-safe construction
 - **Resource Management**: Automatic connection and session lifecycle management
-- **Observability**: OpenTelemetry integration for distributed tracing
-- **Resilience**: Built-in retry, timeout, and circuit breaker patterns
+- **Comprehensive Error Handling**: Structured error types with detailed context
+- **Transaction Support**: Read and write transaction management
 - **Hexagonal Architecture**: Clean separation of concerns with ports and adapters
 
 ## 🚀 Quick Start
@@ -27,34 +26,26 @@ npm install effect-cypher
 ```
 
 ```typescript
-import * as Effect from "effect/Effect";
+import neo4j from "neo4j-driver";
 import {
-  DriverLayer,
-  SessionLayer,
+  createConfig,
+  makeDriver,
+  makeSession,
   runQuery,
-  matchAdults,
-  Person
+  matchAdults
 } from "effect-cypher";
-
-// Define your schema
-const Person = Schema.Struct({
-  id: Schema.String,
-  name: Schema.String,
-  age: Schema.Number
-});
 
 // Create configuration
 const config = createConfig("neo4j://localhost:7687", "neo4j", "password");
 
-// Build query
-const query = matchAdults(20);
-
-// Execute query with manual session management
-const driver = neo4j.driver(config.url, neo4j.auth.basic(config.user, config.password));
-const session = driver.session();
+// Create driver and session
+const driver = makeDriver(config);
+const session = makeSession(driver);
 
 try {
-  const adults = await runQuery(session, query.cypher, query.params, Person);
+  // Build and execute query
+  const query = matchAdults(20);
+  const adults = await runQuery(session, query.cypher, query.params);
   console.log(adults);
 } finally {
   await session.close();
@@ -67,10 +58,8 @@ try {
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Query Building](#query-building)
-- [Schema Validation](#schema-validation)
 - [Transaction Management](#transaction-management)
 - [Error Handling](#error-handling)
-- [Observability](#observability)
 - [Testing](#testing)
 - [Architecture](#architecture)
 - [Contributing](#contributing)
@@ -89,10 +78,16 @@ npm install effect-cypher
 yarn add effect-cypher
 ```
 
+### Dependencies
+
+```bash
+pnpm add neo4j-driver
+```
+
 ### Peer Dependencies
 
 ```bash
-pnpm add effect @neo4j/cypher-builder neo4j-driver
+pnpm add effect
 ```
 
 ## ⚙️ Configuration
@@ -103,18 +98,25 @@ import { createConfig } from "effect-cypher";
 const config = createConfig(
   "neo4j://localhost:7687",  // Neo4j server URL
   "neo4j",                   // Username
-  "password",                // Password
+  "password"                 // Password
+);
+
+// With additional options
+const configWithOptions = createConfig(
+  "neo4j://localhost:7687",
+  "neo4j",
+  "password",
   {
     database: "neo4j",       // Target database (optional)
     defaultTimeoutMs: 30000, // Query timeout (optional)
-    connectionPoolSize: 10,  // Connection pool size (optional)
+    connectionPoolSize: 10   // Connection pool size (optional)
   }
 );
 ```
 
 ## 🔍 Query Building
 
-Use the fluent query builder for type-safe Cypher construction:
+Use the query builder for type-safe Cypher construction:
 
 ```typescript
 import {
@@ -128,7 +130,7 @@ import {
 const findAllQuery = findNodesByLabel("Person");
 
 // Find specific person
-const findByIdQuery = findNodeById("Person", "id", "person-123");
+const findByIdQuery = findNodeById("Person", "person-123");
 
 // Create new person
 const createQuery = createNode("Person", {
@@ -141,53 +143,27 @@ const createQuery = createNode("Person", {
 const adultsQuery = matchAdults(21);
 
 console.log(adultsQuery.cypher);
-// MATCH (person:Person)
-// WHERE person.age >= $param0
-// RETURN {id: person.id, name: person.name, age: person.age}
+// MATCH (person:Person) WHERE person.age >= $minAge RETURN {id: person.id, name: person.name, age: person.age}
 
 console.log(adultsQuery.params);
-// { param0: 21 }
-```
-
-## 📋 Schema Validation
-
-Define and validate your domain models:
-
-```typescript
-import * as Schema from "effect/Schema";
-import { runQuery } from "effect-cypher";
-
-// Define schema
-const PersonSchema = Schema.Struct({
-  id: Schema.String,
-  name: Schema.String,
-  age: Schema.Number.pipe(Schema.greaterThanOrEqualTo(0)),
-  email: Schema.optional(Schema.String.pipe(Schema.pattern(/^[^@]+@[^@]+$/))),
-});
-
-// Execute query with validation
-const result = await Effect.runPromise(
-  runQuery(cypher, params, PersonSchema).pipe(
-    Effect.provide(DriverLayer(config)),
-    Effect.provide(SessionLayer())
-  )
-);
-// result: readonly Person[] - fully typed and validated
+// { minAge: 21 }
 ```
 
 ## 🔄 Transaction Management
 
 ```typescript
-import { withReadTx, withWriteTx } from "effect-cypher";
+import { withReadTx, withWriteTx, makeSession } from "effect-cypher";
 
-const readOperation = withReadTx(async (tx) => {
-  // Read operations
+const session = makeSession(driver);
+
+// Read transaction
+const readResult = await withReadTx(session, async (tx) => {
   const result = await tx.run("MATCH (n) RETURN count(n)");
   return result.records[0].get(0);
 });
 
-const writeOperation = withWriteTx(async (tx) => {
-  // Write operations with automatic commit/rollback
+// Write transaction
+const writeResult = await withWriteTx(session, async (tx) => {
   await tx.run("CREATE (n:Node {prop: $value})", { value: "test" });
   return "created";
 });
@@ -202,44 +178,21 @@ import {
   QueryError,
   ConnectionError,
   ValidationError,
-  isDomainErrorOf
+  isDomainErrorOf,
+  runQuery
 } from "effect-cypher";
 
-const program = Effect.gen(function* (_) {
-  try {
-    const result = yield* _(runQuery(cypher, params, schema));
-    return result;
-  } catch (error) {
-    if (isDomainErrorOf(error, "QueryError")) {
-      console.error("Query failed:", error.query, error.params);
-    } else if (isDomainErrorOf(error, "ConnectionError")) {
-      console.error("Connection failed:", error.url);
-    }
-    throw error;
+try {
+  const result = await runQuery(session, cypher, params);
+  console.log(result);
+} catch (error) {
+  if (isDomainErrorOf(error, "QueryError")) {
+    console.error("Query failed:", error.query, error.params);
+  } else if (isDomainErrorOf(error, "ConnectionError")) {
+    console.error("Connection failed:", error.url);
   }
-});
-```
-
-## 📊 Observability
-
-Enable OpenTelemetry integration:
-
-```typescript
-import { setTracer, setMeter, ObservabilityLayer } from "effect-cypher";
-
-// Initialize (usually during app startup)
-setTracer(opentelemetryTracer);
-setMeter(opentelemetryMeter);
-
-// Queries are automatically instrumented
-const result = await Effect.runPromise(
-  ObservabilityLayer.instrument(
-    "findPersons",
-    cypher,
-    params,
-    runQuery(cypher, params, schema)
-  )
-);
+  throw error;
+}
 ```
 
 ## 🧪 Testing
@@ -268,7 +221,7 @@ describe("matchAdults", () => {
     expect(result.cypher).toContain("MATCH");
     expect(result.cypher).toContain("Person");
     expect(result.cypher).toContain("age >=");
-    expect(result.params).toEqual({ param0: 20 });
+    expect(result.params).toEqual({ minAge: 20 });
   });
 });
 ```
@@ -279,14 +232,14 @@ This library follows Hexagonal Architecture principles:
 
 ```
 effect-cypher/
-├── config/          # Configuration schemas
-├── core/           # Infrastructure layers (Driver, Session, Tx)
-├── cypher/         # Query building and execution
-├── schema/         # Domain schemas and codecs
-├── metrics/        # Observability adapters
-├── errors/         # Domain error types
-├── util/           # Utilities (retry, timeout, etc.)
-└── index.ts        # Public API
+├── src/
+│   ├── config/          # Configuration management
+│   ├── core/           # Infrastructure (Driver, Session, Tx)
+│   ├── cypher/         # Query building and execution
+│   ├── errors/         # Domain error types
+│   └── index.ts        # Public API
+├── tests/              # Test files
+└── package.json        # Package configuration
 ```
 
 ### Dependency Flow
@@ -333,8 +286,8 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- [Effect](https://effect.website/) - For the amazing functional programming framework
-- [@neo4j/cypher-builder](https://github.com/neo4j/cypher-builder) - For safe Cypher query building
+- [Effect](https://effect.website/) - For the functional programming framework
+- [Neo4j Driver](https://github.com/neo4j/neo4j-javascript-driver) - For the official Neo4j JavaScript driver
 - [Neo4j](https://neo4j.com/) - For the world's leading graph database
 
 ## 📞 Support
