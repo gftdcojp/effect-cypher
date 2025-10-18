@@ -1,0 +1,47 @@
+{
+	"name": "effect-cypher",
+	"version": "0.1.0",
+	"description": "Type-safe, monadic Neo4j client using Effect and Cypher Builder",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"test": "vitest",
+		"test:coverage": "vitest --coverage",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"format": "biome format --write .",
+		"clean": "rm -rf dist",
+		"prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test"
+	},
+	"keywords": [
+		"neo4j",
+		"cypher",
+		"effect",
+		"typescript",
+		"type-safe",
+		"monadic",
+		"observable"
+	],
+	"author": "effect-cypher",
+	"license": "MIT",
+	"peerDependencies": {
+		"effect": "^3.0.0"
+	},
+	"dependencies": {
+		"@neo4j/cypher-builder": "^2.0.0",
+		"neo4j-driver": "^5.0.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.8.0",
+		"@types/node": "^20.0.0",
+		"effect": "^3.0.0",
+		"typescript": "^5.0.0",
+		"vitest": "^1.0.0",
+		"@vitest/coverage-v8": "^1.0.0"
+	},
+	"engines": {
+		"node": ">=18.0.0"
+	},
+	"files": ["dist", "README.md", "LICENSE"]
+}
