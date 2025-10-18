@@ -46,10 +46,6 @@ describe("CypherService Integration Tests", () => {
       const queryCypher = "MATCH (p:Person {name: $name}) RETURN {name: p.name, age: p.age}";
       const queryParams = { name: "Alice" };
 
-      // Debug: check raw result first
-      const rawResult = await runQueryRaw(session, queryCypher, queryParams);
-      console.log("Raw result:", rawResult.records[0]?.get(0));
-
       const results = await runQuery(session, queryCypher, queryParams, personSchema);
 
       expect(results).toHaveLength(1);
