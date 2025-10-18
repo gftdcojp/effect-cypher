@@ -198,17 +198,45 @@ try {
 ## 🧪 Testing
 
 ```bash
-# Run tests
+# Run all tests
 pnpm test
+
+# Run unit tests only
+pnpm test:unit
+
+# Run integration tests only (requires Neo4j)
+pnpm test:integration
 
 # Run with coverage
 pnpm test:coverage
 
-# Run integration tests (requires Neo4j)
-pnpm test:integration
+# Run all tests with Docker Neo4j (auto-setup)
+pnpm test:with-db
 ```
 
-Example unit test:
+### Integration Testing with Docker
+
+For integration tests that require a real Neo4j database:
+
+```bash
+# Start Neo4j with Docker Compose
+pnpm run docker:up
+
+# Wait for Neo4j to be ready (about 30 seconds)
+# Then run integration tests
+pnpm run test:integration
+
+# Stop and clean up
+pnpm run docker:down
+```
+
+The docker-compose setup provides:
+- Neo4j 5.23 with authentication (neo4j/testpassword)
+- Health checks to ensure database readiness
+- Persistent data volumes for test data
+- Automatic cleanup between test runs
+
+Example integration test:
 
 ```typescript
 import { describe, it, expect } from "vitest";

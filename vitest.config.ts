@@ -5,6 +5,12 @@ export default defineConfig({
 		environment: "node",
 		globals: true,
 		watch: false,
+		env: {
+			NEO4J_URL: "neo4j://localhost:7687",
+			NEO4J_USER: "neo4j",
+			NEO4J_PASSWORD: "testpassword",
+			NEO4J_DATABASE: "neo4j",
+		},
 		coverage: {
 			provider: "v8",
 			reporter: ["text", "json", "html"],

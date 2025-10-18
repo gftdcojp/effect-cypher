@@ -37,9 +37,8 @@ export const runQuery = async <A>(
 						rawData,
 					);
 				}
-				// For now, call decoder but cast result since Schema integration is complex
-				// TODO: Properly integrate effect/Schema when needed
-				return decoder(rawData) as A;
+				// Decode using Effect Schema
+				return Schema.decodeSync(decoder)(rawData);
 			} catch (decodeError) {
 				if (decodeError instanceof ValidationError) {
 					throw decodeError;

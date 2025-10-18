@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import * as Schema from "effect/Schema";
 import {
 	runQuery,
 	runQuerySingle,
@@ -29,25 +30,29 @@ describe("CypherService", () => {
 	describe("runQuery", () => {
 		it("should execute query and decode results", async () => {
 			const rawData = { id: "test", name: "Test User" };
-			const decodedData = { id: "decoded", name: "Decoded User" };
 			mockRecord.get.mockReturnValue(rawData);
 			mockSession.run.mockResolvedValue(mockResult);
 
-			const decoder = vi.fn().mockReturnValue(decodedData);
+			const decoder = Schema.Struct({
+				id: Schema.String,
+				name: Schema.String,
+			});
 
 			const result = await runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder);
 
 			expect(mockSession.run).toHaveBeenCalledWith("MATCH (n) RETURN n", {});
 			expect(mockRecord.get).toHaveBeenCalledWith(0);
-			expect(decoder).toHaveBeenCalledWith(rawData);
-			expect(result).toEqual([decodedData]);
+			expect(result).toEqual([rawData]);
 		});
 
 		it("should handle null/undefined data with validation error", async () => {
 			mockRecord.get.mockReturnValue(null);
 			mockSession.run.mockResolvedValue(mockResult);
 
-			const decoder = vi.fn();
+			const decoder = Schema.Struct({
+				id: Schema.String,
+				name: Schema.String,
+			});
 
 			await expect(runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder))
 				.rejects.toThrow(ValidationError);

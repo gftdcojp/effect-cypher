@@ -7,7 +7,13 @@
 	"scripts": {
 		"build": "tsc",
 		"test": "vitest",
+		"test:unit": "vitest tests/unit",
+		"test:integration": "vitest tests/integration",
 		"test:coverage": "vitest --coverage",
+		"test:ci": "vitest tests/unit && vitest tests/integration",
+		"docker:up": "docker-compose up -d",
+		"docker:down": "docker-compose down -v",
+		"test:with-db": "pnpm run docker:up && sleep 10 && pnpm run test:ci && pnpm run docker:down",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
 		"format": "biome format --write .",
@@ -42,6 +48,17 @@
 	},
 	"engines": {
 		"node": ">=18.0.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/gftdcojp/effect-cypher.git"
+	},
+	"homepage": "https://github.com/gftdcojp/effect-cypher#readme",
+	"bugs": {
+		"url": "https://github.com/gftdcojp/effect-cypher/issues"
+	},
+	"publishConfig": {
+		"access": "public"
 	},
 	"files": ["dist", "README.md", "LICENSE"]
 }
