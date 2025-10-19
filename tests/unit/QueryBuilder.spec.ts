@@ -52,7 +52,6 @@ describe("QueryBuilder", () => {
 		});
 	});
 
-
 	describe("matchAdults", () => {
 		it("should build a query for adults above minimum age", () => {
 			const result = matchAdults(20);
@@ -66,7 +65,6 @@ describe("QueryBuilder", () => {
 			expect(result.params).toHaveProperty("minAge", 20);
 		});
 	});
-
 
 	describe("Query structure", () => {
 		it("should generate valid Cypher syntax", () => {

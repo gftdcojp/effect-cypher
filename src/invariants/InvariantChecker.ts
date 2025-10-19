@@ -18,7 +18,9 @@ export interface InvariantResult {
 /**
  * Invariant check function
  */
-export type InvariantCheck = (session: Session) => Effect.Effect<InvariantResult, Error, never>;
+export type InvariantCheck = (
+	session: Session,
+) => Effect.Effect<InvariantResult, Error, never>;
 
 /**
  * Creates an invariant that checks if all nodes of a type have a unique relationship

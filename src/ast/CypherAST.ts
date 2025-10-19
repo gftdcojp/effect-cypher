@@ -9,39 +9,113 @@ export type Expr =
 	| { readonly _tag: "Literal"; readonly value: unknown }
 	| { readonly _tag: "Property"; readonly node: string; readonly key: string }
 	| { readonly _tag: "Parameter"; readonly name: string }
-	| { readonly _tag: "BinaryOp"; readonly op: BinaryOperator; readonly left: Expr; readonly right: Expr }
-	| { readonly _tag: "UnaryOp"; readonly op: UnaryOperator; readonly expr: Expr }
-	| { readonly _tag: "Function"; readonly name: string; readonly args: readonly Expr[] };
+	| {
+			readonly _tag: "BinaryOp";
+			readonly op: BinaryOperator;
+			readonly left: Expr;
+			readonly right: Expr;
+	  }
+	| {
+			readonly _tag: "UnaryOp";
+			readonly op: UnaryOperator;
+			readonly expr: Expr;
+	  }
+	| {
+			readonly _tag: "Function";
+			readonly name: string;
+			readonly args: readonly Expr[];
+	  };
 
-export type BinaryOperator = "=" | "!=" | "<" | "<=" | ">" | ">=" | "AND" | "OR" | "+" | "-" | "*" | "/" | "IN" | "CONTAINS" | "STARTS WITH" | "ENDS WITH";
+export type BinaryOperator =
+	| "="
+	| "!="
+	| "<"
+	| "<="
+	| ">"
+	| ">="
+	| "AND"
+	| "OR"
+	| "+"
+	| "-"
+	| "*"
+	| "/"
+	| "IN"
+	| "CONTAINS"
+	| "STARTS WITH"
+	| "ENDS WITH";
 export type UnaryOperator = "NOT" | "-" | "IS NULL" | "IS NOT NULL";
 
 /**
  * Pattern matching for nodes and relationships
  */
 export type Pattern =
-	| { readonly _tag: "Node"; readonly variable: string; readonly labels: readonly string[]; readonly properties?: Record<string, Expr> }
-	| { readonly _tag: "Relationship"; readonly variable?: string; readonly type?: string; readonly direction: "out" | "in" | "both"; readonly properties?: Record<string, Expr> }
-	| { readonly _tag: "Path"; readonly elements: readonly (Pattern & { readonly _tag: "Node" | "Relationship" })[] };
+	| {
+			readonly _tag: "Node";
+			readonly variable: string;
+			readonly labels: readonly string[];
+			readonly properties?: Record<string, Expr>;
+	  }
+	| {
+			readonly _tag: "Relationship";
+			readonly variable?: string;
+			readonly type?: string;
+			readonly direction: "out" | "in" | "both";
+			readonly properties?: Record<string, Expr>;
+	  }
+	| {
+			readonly _tag: "Path";
+			readonly elements: readonly (Pattern & {
+				readonly _tag: "Node" | "Relationship";
+			})[];
+	  };
 
 /**
  * Query clauses
  */
 export type Clause =
-	| { readonly _tag: "Match"; readonly pattern: Pattern; readonly optional: boolean }
+	| {
+			readonly _tag: "Match";
+			readonly pattern: Pattern;
+			readonly optional: boolean;
+	  }
 	| { readonly _tag: "Where"; readonly condition: Expr }
 	| { readonly _tag: "Return"; readonly expressions: readonly ReturnExpr[] }
 	| { readonly _tag: "Create"; readonly pattern: Pattern }
-	| { readonly _tag: "Delete"; readonly variables: readonly string[]; readonly detach: boolean }
-	| { readonly _tag: "Set"; readonly assignments: readonly { readonly variable: string; readonly key: string; readonly value: Expr }[] }
-	| { readonly _tag: "OrderBy"; readonly items: readonly { readonly expr: Expr; readonly direction: "ASC" | "DESC" }[] }
+	| {
+			readonly _tag: "Delete";
+			readonly variables: readonly string[];
+			readonly detach: boolean;
+	  }
+	| {
+			readonly _tag: "Set";
+			readonly assignments: readonly {
+				readonly variable: string;
+				readonly key: string;
+				readonly value: Expr;
+			}[];
+	  }
+	| {
+			readonly _tag: "OrderBy";
+			readonly items: readonly {
+				readonly expr: Expr;
+				readonly direction: "ASC" | "DESC";
+			}[];
+	  }
 	| { readonly _tag: "Limit"; readonly count: number }
 	| { readonly _tag: "Skip"; readonly count: number }
 	| { readonly _tag: "With"; readonly expressions: readonly ReturnExpr[] };
 
 export type ReturnExpr =
-	| { readonly _tag: "Variable"; readonly name: string; readonly alias?: string }
-	| { readonly _tag: "Expression"; readonly expr: Expr; readonly alias?: string };
+	| {
+			readonly _tag: "Variable";
+			readonly name: string;
+			readonly alias?: string;
+	  }
+	| {
+			readonly _tag: "Expression";
+			readonly expr: Expr;
+			readonly alias?: string;
+	  };
 
 /**
  * Complete query AST
@@ -70,7 +144,11 @@ export const param = (name: string): Expr => ({
 	name,
 });
 
-export const binaryOp = (op: BinaryOperator, left: Expr, right: Expr): Expr => ({
+export const binaryOp = (
+	op: BinaryOperator,
+	left: Expr,
+	right: Expr,
+): Expr => ({
 	_tag: "BinaryOp",
 	op,
 	left,
@@ -89,8 +167,7 @@ export const and = (left: Expr, right: Expr): Expr =>
 export const or = (left: Expr, right: Expr): Expr =>
 	binaryOp("OR", left, right);
 
-export const not = (expr: Expr): Expr =>
-	unaryOp("NOT", expr);
+export const not = (expr: Expr): Expr => unaryOp("NOT", expr);
 
 export const node = (
 	variable: string,

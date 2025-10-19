@@ -56,7 +56,8 @@ const compileClause = (clause: Clause): string => {
 const compilePattern = (pattern: Pattern): string => {
 	switch (pattern._tag) {
 		case "Node": {
-			const labels = pattern.labels.length > 0 ? `:${pattern.labels.join(":")}` : "";
+			const labels =
+				pattern.labels.length > 0 ? `:${pattern.labels.join(":")}` : "";
 			const props = pattern.properties
 				? ` {${Object.entries(pattern.properties)
 						.map(([k, v]) => `${k}: ${compileExpr(v)}`)
@@ -121,6 +122,8 @@ const compileReturnExpr = (expr: ReturnExpr): string => {
 		case "Variable":
 			return expr.alias ? `${expr.name} AS ${expr.alias}` : expr.name;
 		case "Expression":
-			return expr.alias ? `${compileExpr(expr.expr)} AS ${expr.alias}` : compileExpr(expr.expr);
+			return expr.alias
+				? `${compileExpr(expr.expr)} AS ${expr.alias}`
+				: compileExpr(expr.expr);
 	}
 };

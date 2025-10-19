@@ -1,6 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import neo4j from "neo4j-driver";
-import { makeSession, makeWriteSession, SessionError } from "../../src/core/SessionLayer";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	SessionError,
+	makeSession,
+	makeWriteSession,
+} from "../../src/core/SessionLayer";
 
 // Mock neo4j driver
 vi.mock("neo4j-driver", () => ({

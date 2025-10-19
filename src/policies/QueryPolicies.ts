@@ -59,7 +59,10 @@ export const retrySchedules = {
 	/**
 	 * Fixed delay: 1s, 1s, 1s, ...
 	 */
-	fixed: (delayMs = 1000, maxRetries = 3): Schedule.Schedule<number, unknown, never> =>
+	fixed: (
+		delayMs = 1000,
+		maxRetries = 3,
+	): Schedule.Schedule<number, unknown, never> =>
 		Schedule.fixed(`${delayMs} millis`).pipe(
 			Schedule.compose(Schedule.recurs(maxRetries)),
 		),

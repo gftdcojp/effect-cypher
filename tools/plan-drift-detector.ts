@@ -72,7 +72,10 @@ export const detectDrift = (
 	previousVersion: string,
 	dbPath = "./query-plans.json",
 	thresholdPercent = 10,
-): { driftDetected: boolean; drifts: Array<{ query: string; change: string }> } => {
+): {
+	driftDetected: boolean;
+	drifts: Array<{ query: string; change: string }>;
+} => {
 	if (!fs.existsSync(dbPath)) {
 		console.log("⚠️  No plan database found. Run 'pnpm plan:record' first.");
 		return { driftDetected: false, drifts: [] };
@@ -137,9 +140,13 @@ export const detectDrift = (
 	}
 
 	if (driftDetected) {
-		console.log(`\n❌ DRIFT DETECTED: ${driftPercent.toFixed(1)}% exceeds threshold of ${thresholdPercent}%`);
+		console.log(
+			`\n❌ DRIFT DETECTED: ${driftPercent.toFixed(1)}% exceeds threshold of ${thresholdPercent}%`,
+		);
 	} else {
-		console.log(`\n✅ Drift within acceptable range (${driftPercent.toFixed(1)}% < ${thresholdPercent}%)`);
+		console.log(
+			`\n✅ Drift within acceptable range (${driftPercent.toFixed(1)}% < ${thresholdPercent}%)`,
+		);
 	}
 
 	return { driftDetected, drifts };
@@ -155,18 +162,27 @@ if (require.main === module) {
 		const version = process.argv[3] || "unknown";
 		console.log(`Recording plans for version ${version}...`);
 		console.log("Note: This is a sample implementation.");
-		console.log("In production, integrate with EXPLAIN/PROFILE queries against your Neo4j instance.");
+		console.log(
+			"In production, integrate with EXPLAIN/PROFILE queries against your Neo4j instance.",
+		);
 	} else if (command === "diff") {
 		const current = process.argv[3] || "current";
 		const previous = process.argv[4] || "previous";
 		const threshold = Number.parseInt(process.argv[5] || "10", 10);
 
-		const result = detectDrift(current, previous, "./query-plans.json", threshold);
+		const result = detectDrift(
+			current,
+			previous,
+			"./query-plans.json",
+			threshold,
+		);
 		process.exit(result.driftDetected ? 1 : 0);
 	} else {
 		console.log("Usage:");
 		console.log("  plan-drift-detector record <version>");
-		console.log("  plan-drift-detector diff <current-version> <previous-version> [threshold-percent]");
+		console.log(
+			"  plan-drift-detector diff <current-version> <previous-version> [threshold-percent]",
+		);
 		console.log("");
 		console.log("Example:");
 		console.log("  plan-drift-detector record v1.2.0");

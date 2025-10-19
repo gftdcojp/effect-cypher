@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	type NodeID,
 	createNodeID,
 	isNodeID,
 	ms,
@@ -7,7 +8,6 @@ import {
 	seconds,
 	secondsToMs,
 	unwrapNodeID,
-	type NodeID,
 } from "../../src/types/BrandedTypes";
 
 describe("BrandedTypes", () => {
@@ -41,7 +41,9 @@ describe("BrandedTypes", () => {
 
 		it("should validate ID values", () => {
 			expect(() => createNodeID("Person", "")).toThrow("Invalid ID value");
-			expect(() => createNodeID("Person", null as any)).toThrow("Invalid ID value");
+			expect(() => createNodeID("Person", null as any)).toThrow(
+				"Invalid ID value",
+			);
 		});
 
 		it("should work with type guards", () => {
@@ -65,11 +67,15 @@ describe("BrandedTypes", () => {
 
 		it("should validate unit values", () => {
 			expect(() => ms(-1)).toThrow("Invalid millisecond value");
-			expect(() => ms(Number.POSITIVE_INFINITY)).toThrow("Invalid millisecond value");
-			expect(() => ms(NaN)).toThrow("Invalid millisecond value");
+			expect(() => ms(Number.POSITIVE_INFINITY)).toThrow(
+				"Invalid millisecond value",
+			);
+			expect(() => ms(Number.NaN)).toThrow("Invalid millisecond value");
 
 			expect(() => seconds(-1)).toThrow("Invalid seconds value");
-			expect(() => seconds(Number.POSITIVE_INFINITY)).toThrow("Invalid seconds value");
+			expect(() => seconds(Number.POSITIVE_INFINITY)).toThrow(
+				"Invalid seconds value",
+			);
 		});
 
 		it("should convert between units", () => {
@@ -113,7 +119,9 @@ describe("BrandedTypes", () => {
 
 		it("should prevent timeout value confusion", () => {
 			// Simulating a function that expects milliseconds
-			const setTimeoutMs = (duration: import("../../src/types/BrandedTypes").Ms): number => {
+			const setTimeoutMs = (
+				duration: import("../../src/types/BrandedTypes").Ms,
+			): number => {
 				return duration as number;
 			};
 

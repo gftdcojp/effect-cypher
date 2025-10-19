@@ -117,7 +117,9 @@ describe("CypherAST", () => {
 			const q = query(
 				[
 					matchClause(node("person", ["Person"])),
-					whereClause(binaryOp(">=", property("person", "age"), param("minAge"))),
+					whereClause(
+						binaryOp(">=", property("person", "age"), param("minAge")),
+					),
 					returnClause([{ _tag: "Variable", name: "person" }]),
 				],
 				{ minAge: 18 },

@@ -52,10 +52,14 @@ const normalizeClause = (clause: Clause): Clause => {
 		case "Set":
 			return {
 				...clause,
-				assignments: clause.assignments.map((a) => ({
-					...a,
-					value: normalizeExpr(a.value),
-				})).sort((a, b) => `${a.variable}.${a.key}`.localeCompare(`${b.variable}.${b.key}`)),
+				assignments: clause.assignments
+					.map((a) => ({
+						...a,
+						value: normalizeExpr(a.value),
+					}))
+					.sort((a, b) =>
+						`${a.variable}.${a.key}`.localeCompare(`${b.variable}.${b.key}`),
+					),
 			};
 		case "OrderBy":
 			return {
@@ -104,7 +108,11 @@ const normalizeExpr = (expr: Expr): Expr => {
 			const normalized = normalizeExpr(expr.expr);
 
 			// Double negation: NOT NOT x => x
-			if (expr.op === "NOT" && normalized._tag === "UnaryOp" && normalized.op === "NOT") {
+			if (
+				expr.op === "NOT" &&
+				normalized._tag === "UnaryOp" &&
+				normalized.op === "NOT"
+			) {
 				return normalized.expr;
 			}
 
@@ -188,7 +196,12 @@ const normalizePattern = (pattern: Pattern): Pattern => {
 		case "Path":
 			return {
 				...pattern,
-				elements: pattern.elements.map((e) => normalizePattern(e) as Pattern & { readonly _tag: "Node" | "Relationship" }),
+				elements: pattern.elements.map(
+					(e) =>
+						normalizePattern(e) as Pattern & {
+							readonly _tag: "Node" | "Relationship";
+						},
+				),
 			};
 		default:
 			return pattern;
@@ -211,7 +224,9 @@ const normalizeReturnExpr = (expr: ReturnExpr): ReturnExpr => {
 /**
  * Sorts parameters alphabetically for stable output
  */
-const sortParamsStable = (params: Record<string, unknown>): Record<string, unknown> => {
+const sortParamsStable = (
+	params: Record<string, unknown>,
+): Record<string, unknown> => {
 	const sorted: Record<string, unknown> = {};
 	for (const key of Object.keys(params).sort()) {
 		sorted[key] = params[key];

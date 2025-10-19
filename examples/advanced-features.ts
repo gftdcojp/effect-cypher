@@ -1,6 +1,6 @@
 /**
  * Advanced Features Demo
- * 
+ *
  * This file demonstrates all the advanced features added to effect-cypher:
  * 1. AST IR and deterministic compilation
  * 2. Normalization with algebraic rules
@@ -13,47 +13,42 @@
 
 import * as Effect from "effect/Effect";
 import {
+	type ExampleSchema,
+	// Observability
+	LatencyTracker,
+	type NodeID,
+	// Invariants
+	allNodesHaveProperty,
 	// AST Building
 	and,
+	astHash,
 	binaryOp,
+	checkInvariants,
 	compile,
+	// Branded Types
+	createNodeID,
+	createQueryMetrics,
+	// Effect Policies
+	executeWithPolicies,
+	forAllExistsUnique,
 	literal,
 	matchClause,
+	ms,
 	node,
 	normalize,
 	param,
 	property,
+	propertyIsUnique,
 	query,
+	retrySchedules,
 	returnClause,
-	whereClause,
-
-	// Observability
-	LatencyTracker,
-	astHash,
-	createQueryMetrics,
-
-	// Branded Types
-	createNodeID,
-	ms,
 	seconds,
 	secondsToMs,
-	type NodeID,
-
-	// Effect Policies
-	executeWithPolicies,
-	retrySchedules,
-	withCircuitBreaker,
-	withIdempotency,
-
-	// Invariants
-	allNodesHaveProperty,
-	checkInvariants,
-	forAllExistsUnique,
-	propertyIsUnique,
-
 	// Schema Adjacency
 	startPath,
-	type ExampleSchema,
+	whereClause,
+	withCircuitBreaker,
+	withIdempotency,
 } from "../src/index";
 
 /**
@@ -131,7 +126,7 @@ export const demo3_Observability = () => {
 
 	// Track latency percentiles
 	const tracker = new LatencyTracker();
-	
+
 	// Simulate some measurements
 	for (let i = 0; i < 100; i++) {
 		tracker.record(Math.random() * 200 + 50);
@@ -147,7 +142,10 @@ export const demo3_Observability = () => {
 
 	// Create query metrics
 	const q = query(
-		[matchClause(node("p", ["Person"])), returnClause([{ _tag: "Variable", name: "p" }])],
+		[
+			matchClause(node("p", ["Person"])),
+			returnClause([{ _tag: "Variable", name: "p" }]),
+		],
 		{},
 	);
 
@@ -201,13 +199,17 @@ export const demo5_Invariants = () => {
 	console.log("=== Demo 5: Invariant Checking ===\n");
 
 	console.log("Example invariants:");
-	console.log("  1. Each Post has exactly one author (∀p ∃! u. (u)-[:AUTHORED]->(p))");
+	console.log(
+		"  1. Each Post has exactly one author (∀p ∃! u. (u)-[:AUTHORED]->(p))",
+	);
 	console.log("  2. All Person nodes have a name property");
 	console.log("  3. Person IDs are unique");
 	console.log("");
 
 	console.log("To run invariants:");
-	console.log("  ts-node tools/invariants-cli.ts --url neo4j://localhost:7687 --user neo4j --password password");
+	console.log(
+		"  ts-node tools/invariants-cli.ts --url neo4j://localhost:7687 --user neo4j --password password",
+	);
 	console.log("");
 };
 
@@ -223,7 +225,9 @@ export const demo6_SchemaAdjacency = () => {
 		.traverse("AUTHORED") // Person -> Post
 		.traverse("HAS_TAG"); // Post -> Tag
 
-	console.log("Valid path created: Person -[:AUTHORED]-> Post -[:HAS_TAG]-> Tag");
+	console.log(
+		"Valid path created: Person -[:AUTHORED]-> Post -[:HAS_TAG]-> Tag",
+	);
 	console.log("");
 
 	// This would cause a TypeScript error:
@@ -241,9 +245,15 @@ export const demo7_PropertyBasedTesting = () => {
 	console.log("=== Demo 7: Property-Based Testing ===\n");
 
 	console.log("Property-based tests ensure:");
-	console.log("  ✓ Normalization is idempotent (normalize(normalize(q)) = normalize(q))");
-	console.log("  ✓ Compilation is deterministic (compile(q) always produces same output)");
-	console.log("  ✓ Commutativity holds (AND(a,b) = AND(b,a) after normalization)");
+	console.log(
+		"  ✓ Normalization is idempotent (normalize(normalize(q)) = normalize(q))",
+	);
+	console.log(
+		"  ✓ Compilation is deterministic (compile(q) always produces same output)",
+	);
+	console.log(
+		"  ✓ Commutativity holds (AND(a,b) = AND(b,a) after normalization)",
+	);
 	console.log("  ✓ Double negation elimination (NOT(NOT(x)) = x)");
 	console.log("  ✓ Parameter ordering is stable");
 	console.log("");

@@ -7,7 +7,7 @@ import type { NodeID } from "./BrandedTypes";
 /**
  * Default adjacency map interface
  * Extend this in your application to define your schema
- * 
+ *
  * Example:
  * ```typescript
  * declare module "effect-cypher" {
@@ -21,14 +21,13 @@ import type { NodeID } from "./BrandedTypes";
  * }
  * ```
  */
-export interface AdjacencyMap {
-	// Default empty - to be extended by consumers
-}
+export type AdjacencyMap = {};
 
 /**
  * Get valid relationship types from a source label
  */
-export type ValidRelationship<From extends keyof AdjacencyMap> = keyof AdjacencyMap[From];
+export type ValidRelationship<From extends keyof AdjacencyMap> =
+	keyof AdjacencyMap[From];
 
 /**
  * Get target label type for a relationship
@@ -76,7 +75,11 @@ export class PathBuilder<Current extends keyof AdjacencyMap> {
 	constructor(
 		private readonly start: Current,
 		private readonly startId: NodeID<Current & string> | undefined,
-		private readonly hops: Array<{ from: string; relationship: string; direction: string }>,
+		private readonly hops: Array<{
+			from: string;
+			relationship: string;
+			direction: string;
+		}>,
 	) {}
 
 	/**
@@ -147,17 +150,17 @@ export interface ExampleSchema extends AdjacencyMap {
 
 /**
  * Example usage demonstrating type safety:
- * 
+ *
  * ```typescript
  * // Valid path - all relationships exist in schema
  * const validPath = startPath<ExampleSchema>("Person")
  *   .traverse("AUTHORED")  // Person -> Post
  *   .traverse("HAS_TAG");  // Post -> Tag
- * 
+ *
  * // Invalid path - TypeScript error!
  * const invalidPath = startPath<ExampleSchema>("Person")
  *   .traverse("HAS_TAG");  // ❌ Person doesn't have HAS_TAG relationship
- * 
+ *
  * // Invalid path - wrong relationship
  * const wrongPath = startPath<ExampleSchema>("City")
  *   .traverse("AUTHORED");  // ❌ City doesn't have AUTHORED relationship

@@ -6,12 +6,12 @@
 
 import neo4j from "neo4j-driver";
 import {
+	type InvariantCheck,
 	allNodesHaveProperty,
 	exampleInvariants,
 	forAllExistsUnique,
 	propertyIsUnique,
 	runInvariantsOrFail,
-	type InvariantCheck,
 } from "../src/invariants/InvariantChecker";
 
 interface CliArgs {
@@ -35,10 +35,14 @@ const parseArgs = (): CliArgs => {
 	}
 
 	if (!result.url || !result.user || !result.password) {
-		console.error("Usage: ts-node tools/invariants-cli.ts --url <url> --user <user> --password <password> [--database <db>]");
+		console.error(
+			"Usage: ts-node tools/invariants-cli.ts --url <url> --user <user> --password <password> [--database <db>]",
+		);
 		console.error("");
 		console.error("Example:");
-		console.error("  ts-node tools/invariants-cli.ts --url neo4j://localhost:7687 --user neo4j --password password");
+		console.error(
+			"  ts-node tools/invariants-cli.ts --url neo4j://localhost:7687 --user neo4j --password password",
+		);
 		process.exit(1);
 	}
 
@@ -51,12 +55,7 @@ const parseArgs = (): CliArgs => {
 const defineInvariants = (): InvariantCheck[] => {
 	return [
 		// Example: Each Post has exactly one author
-		forAllExistsUnique(
-			"Post has unique author",
-			"Post",
-			"AUTHORED",
-			"Person",
-		),
+		forAllExistsUnique("Post has unique author", "Post", "AUTHORED", "Person"),
 
 		// Example: All Person nodes have required properties
 		allNodesHaveProperty("Person has name", "Person", "name"),
@@ -112,7 +111,10 @@ const main = async (): Promise<void> => {
 		}
 	} catch (error) {
 		console.error("");
-		console.error("❌ Error:", error instanceof Error ? error.message : String(error));
+		console.error(
+			"❌ Error:",
+			error instanceof Error ? error.message : String(error),
+		);
 		process.exit(1);
 	} finally {
 		await driver.close();

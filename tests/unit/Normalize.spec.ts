@@ -100,7 +100,11 @@ describe("Normalize", () => {
 			const q = query([
 				{ _tag: "Return", expressions: [] },
 				{ _tag: "Where", condition: literal(true) },
-				{ _tag: "Match", pattern: { _tag: "Node", variable: "n", labels: [] }, optional: false },
+				{
+					_tag: "Match",
+					pattern: { _tag: "Node", variable: "n", labels: [] },
+					optional: false,
+				},
 			]);
 
 			const normalized = normalize(q);
@@ -117,7 +121,11 @@ describe("Normalize", () => {
 				[
 					{
 						_tag: "Match",
-						pattern: { _tag: "Node", variable: "p", labels: ["Person", "User"] },
+						pattern: {
+							_tag: "Node",
+							variable: "p",
+							labels: ["Person", "User"],
+						},
 						optional: false,
 					},
 					{
@@ -135,7 +143,11 @@ describe("Normalize", () => {
 				[
 					{
 						_tag: "Match",
-						pattern: { _tag: "Node", variable: "p", labels: ["User", "Person"] },
+						pattern: {
+							_tag: "Node",
+							variable: "p",
+							labels: ["User", "Person"],
+						},
 						optional: false,
 					},
 					{

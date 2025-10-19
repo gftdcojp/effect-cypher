@@ -66,9 +66,5 @@
 		"access": "public",
 		"registry": "https://npm.pkg.github.com"
 	},
-	"files": [
-		"dist",
-		"README.md",
-		"LICENSE"
-	]
+	"files": ["dist", "README.md", "LICENSE"]
 }

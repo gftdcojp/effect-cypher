@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
+	type ExampleSchema,
 	hop,
 	startPath,
-	type ExampleSchema,
 } from "../../src/types/SchemaAdjacency";
 
 describe("SchemaAdjacency", () => {
 	describe("hop", () => {
 		it("should create a hop descriptor", () => {
-			const h = hop<ExampleSchema, "Person", "AUTHORED">("Person", "AUTHORED", "out");
+			const h = hop<ExampleSchema, "Person", "AUTHORED">(
+				"Person",
+				"AUTHORED",
+				"out",
+			);
 
 			expect(h.from).toBe("Person");
 			expect(h.relationship).toBe("AUTHORED");
@@ -31,7 +35,9 @@ describe("SchemaAdjacency", () => {
 		});
 
 		it("should build a single-hop path", () => {
-			const path = startPath<ExampleSchema, "Person">("Person").traverse("AUTHORED");
+			const path = startPath<ExampleSchema, "Person">("Person").traverse(
+				"AUTHORED",
+			);
 
 			const hops = path.getHops();
 			expect(hops).toHaveLength(1);
@@ -77,7 +83,7 @@ describe("SchemaAdjacency", () => {
 		});
 
 		// Note: The following would cause TypeScript errors at compile time:
-		
+
 		// Invalid: Person doesn't have HAS_TAG relationship
 		// const invalid1 = startPath<ExampleSchema, "Person">("Person")
 		//   .traverse("HAS_TAG"); // ❌ TS Error

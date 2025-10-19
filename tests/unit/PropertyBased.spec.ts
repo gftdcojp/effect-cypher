@@ -1,6 +1,9 @@
-import { describe, it } from "vitest";
 import * as fc from "fast-check";
+import { describe, it } from "vitest";
+import { compile } from "../../src/ast/Compile";
 import {
+	type Clause,
+	type Expr,
 	and,
 	binaryOp,
 	literal,
@@ -13,10 +16,7 @@ import {
 	query,
 	returnClause,
 	whereClause,
-	type Clause,
-	type Expr,
 } from "../../src/ast/CypherAST";
-import { compile } from "../../src/ast/Compile";
 import { normalize } from "../../src/ast/Normalize";
 
 // Arbitraries for generating AST elements
@@ -29,12 +29,17 @@ const arbLiteral = (): fc.Arbitrary<Expr> =>
 	);
 
 const arbProperty = (): fc.Arbitrary<Expr> =>
-	fc.tuple(fc.constantFrom("n", "p", "x", "y"), fc.constantFrom("id", "name", "age", "active")).map(([node, key]) =>
-		property(node, key),
-	);
+	fc
+		.tuple(
+			fc.constantFrom("n", "p", "x", "y"),
+			fc.constantFrom("id", "name", "age", "active"),
+		)
+		.map(([node, key]) => property(node, key));
 
 const arbParam = (): fc.Arbitrary<Expr> =>
-	fc.constantFrom("param1", "param2", "minValue", "maxValue").map((name) => param(name));
+	fc
+		.constantFrom("param1", "param2", "minValue", "maxValue")
+		.map((name) => param(name));
 
 const arbSimpleExpr = (): fc.Arbitrary<Expr> =>
 	fc.oneof(arbLiteral(), arbProperty(), arbParam());
@@ -66,13 +71,17 @@ const arbLabels = (): fc.Arbitrary<readonly string[]> =>
 	fc.constantFrom(["Person"], ["Post"], ["User"], ["Person", "Active"]);
 
 const arbMatchClause = (): fc.Arbitrary<Clause> =>
-	fc.tuple(arbNode(), arbLabels()).map(([variable, labels]) => matchClause(node(variable, labels)));
+	fc
+		.tuple(arbNode(), arbLabels())
+		.map(([variable, labels]) => matchClause(node(variable, labels)));
 
 const arbWhereClause = (): fc.Arbitrary<Clause> =>
 	arbExpr().map((expr) => whereClause(expr));
 
 const arbReturnClause = (): fc.Arbitrary<Clause> =>
-	arbNode().map((variable) => returnClause([{ _tag: "Variable", name: variable }]));
+	arbNode().map((variable) =>
+		returnClause([{ _tag: "Variable", name: variable }]),
+	);
 
 const arbQuery = (): fc.Arbitrary<ReturnType<typeof query>> =>
 	fc
@@ -100,20 +109,16 @@ describe("Property-Based Tests", () => {
 
 		it("should produce identical output for simple commutative operations", () => {
 			fc.assert(
-				fc.property(
-					arbSimpleExpr(),
-					arbSimpleExpr(),
-					(left, right) => {
-						const q1 = query([whereClause(and(left, right))]);
-						const q2 = query([whereClause(and(right, left))]);
+				fc.property(arbSimpleExpr(), arbSimpleExpr(), (left, right) => {
+					const q1 = query([whereClause(and(left, right))]);
+					const q2 = query([whereClause(and(right, left))]);
 
-						const n1 = normalize(q1);
-						const n2 = normalize(q2);
+					const n1 = normalize(q1);
+					const n2 = normalize(q2);
 
-						// Simple AND is commutative
-						return JSON.stringify(n1) === JSON.stringify(n2);
-					},
-				),
+					// Simple AND is commutative
+					return JSON.stringify(n1) === JSON.stringify(n2);
+				}),
 				{ numRuns: 20 },
 			);
 		});
@@ -187,7 +192,10 @@ describe("Property-Based Tests", () => {
 					const c2 = compile(n2);
 
 					// Should produce identical results
-					return c1.cypher === c2.cypher && JSON.stringify(c1.params) === JSON.stringify(c2.params);
+					return (
+						c1.cypher === c2.cypher &&
+						JSON.stringify(c1.params) === JSON.stringify(c2.params)
+					);
 				}),
 				{ numRuns: 20 },
 			);

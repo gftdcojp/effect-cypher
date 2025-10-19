@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { compile } from "../../src/ast/Compile";
 import {
 	binaryOp,
 	literal,
@@ -10,7 +11,6 @@ import {
 	returnClause,
 	whereClause,
 } from "../../src/ast/CypherAST";
-import { compile } from "../../src/ast/Compile";
 import { normalize } from "../../src/ast/Normalize";
 
 describe("Compile", () => {
@@ -106,9 +106,7 @@ describe("Compile", () => {
 				{ minAge: 20 },
 			);
 
-			const results = Array.from({ length: 10 }, () =>
-				compile(normalize(q)),
-			);
+			const results = Array.from({ length: 10 }, () => compile(normalize(q)));
 
 			// All compilations should produce identical output
 			for (let i = 1; i < results.length; i++) {

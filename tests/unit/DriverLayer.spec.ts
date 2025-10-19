@@ -1,7 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import neo4j from "neo4j-driver";
-import { makeDriver, verifyConnectivity, DriverError } from "../../src/core/DriverLayer";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createConfig } from "../../src/config/Neo4jConfig";
+import {
+	DriverError,
+	makeDriver,
+	verifyConnectivity,
+} from "../../src/core/DriverLayer";
 
 // Mock neo4j driver
 vi.mock("neo4j-driver", () => ({
@@ -24,7 +28,11 @@ describe("DriverLayer", () => {
 		session: vi.fn(),
 	};
 
-	const mockConfig = createConfig("neo4j://localhost:7687", "neo4j", "password");
+	const mockConfig = createConfig(
+		"neo4j://localhost:7687",
+		"neo4j",
+		"password",
+	);
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -41,7 +49,7 @@ describe("DriverLayer", () => {
 				{
 					database: "testdb",
 					connectionPoolSize: 5,
-				}
+				},
 			);
 
 			const driver = makeDriver(config);
@@ -52,7 +60,7 @@ describe("DriverLayer", () => {
 				{
 					maxConnectionPoolSize: 5,
 					maxConnectionLifetime: 3600000,
-				}
+				},
 			);
 			expect(neo4j.auth.basic).toHaveBeenCalledWith("neo4j", "password");
 			expect(driver).toBe(mockDriver);
@@ -67,7 +75,7 @@ describe("DriverLayer", () => {
 				{
 					maxConnectionPoolSize: 10,
 					maxConnectionLifetime: 3600000,
-				}
+				},
 			);
 		});
 
@@ -78,7 +86,11 @@ describe("DriverLayer", () => {
 		});
 
 		it("should use default values when config properties are undefined", () => {
-			const config = createConfig("neo4j://localhost:7687", "neo4j", "password");
+			const config = createConfig(
+				"neo4j://localhost:7687",
+				"neo4j",
+				"password",
+			);
 
 			const driver = makeDriver(config);
 
@@ -88,7 +100,7 @@ describe("DriverLayer", () => {
 				{
 					maxConnectionPoolSize: 10, // default value
 					maxConnectionLifetime: 3600000, // default value
-				}
+				},
 			);
 		});
 	});

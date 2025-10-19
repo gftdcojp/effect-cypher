@@ -15,13 +15,13 @@ export * from "./cypher/QueryBuilder";
 
 // Error Types
 export {
-  DomainError,
-  QueryError,
-  ConnectionError,
-  ValidationError,
-  ConstraintError,
-  isDomainError,
-  isDomainErrorOf,
+	DomainError,
+	QueryError,
+	ConnectionError,
+	ValidationError,
+	ConstraintError,
+	isDomainError,
+	isDomainErrorOf,
 } from "./errors/DomainError";
 
 // AST and Compilation
