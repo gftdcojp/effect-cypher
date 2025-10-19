@@ -1,5 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { withReadTx, withWriteTx, withReadTxBatch, withWriteTxBatch, TransactionError } from "../../src/core/TxManager";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	TransactionError,
+	withReadTx,
+	withReadTxBatch,
+	withWriteTx,
+	withWriteTxBatch,
+} from "../../src/core/TxManager";
 
 describe("TxManager", () => {
 	const mockTx = {
@@ -35,7 +41,9 @@ describe("TxManager", () => {
 			mockSession.executeRead.mockRejectedValue(error);
 
 			const txFn = vi.fn();
-			await expect(withReadTx(mockSession, txFn)).rejects.toThrow("Transaction failed");
+			await expect(withReadTx(mockSession, txFn)).rejects.toThrow(
+				"Transaction failed",
+			);
 		});
 	});
 
@@ -59,7 +67,9 @@ describe("TxManager", () => {
 			mockSession.executeWrite.mockRejectedValue(error);
 
 			const txFn = vi.fn();
-			await expect(withWriteTx(mockSession, txFn)).rejects.toThrow("Write transaction failed");
+			await expect(withWriteTx(mockSession, txFn)).rejects.toThrow(
+				"Write transaction failed",
+			);
 		});
 	});
 
@@ -121,7 +131,9 @@ describe("TxManager", () => {
 
 			const operations = [vi.fn().mockRejectedValue(error)];
 
-			await expect(withWriteTxBatch(mockSession, operations)).rejects.toThrow("Batch write failed");
+			await expect(withWriteTxBatch(mockSession, operations)).rejects.toThrow(
+				"Batch write failed",
+			);
 		});
 	});
 

@@ -59,9 +59,13 @@ describe("Neo4jConfig", () => {
 		});
 
 		it("should throw error for invalid config type", () => {
-			expect(() => validateConfig("invalid")).toThrow("config must be an object");
+			expect(() => validateConfig("invalid")).toThrow(
+				"config must be an object",
+			);
 			expect(() => validateConfig(null)).toThrow("config must be an object");
-			expect(() => validateConfig(undefined)).toThrow("config must be an object");
+			expect(() => validateConfig(undefined)).toThrow(
+				"config must be an object",
+			);
 		});
 
 		it("should throw error for missing url", () => {
@@ -70,7 +74,9 @@ describe("Neo4jConfig", () => {
 				password: "password",
 			};
 
-			expect(() => validateConfig(config)).toThrow("url is required and must be a string");
+			expect(() => validateConfig(config)).toThrow(
+				"url is required and must be a string",
+			);
 		});
 
 		it("should throw error for invalid url type", () => {
@@ -80,7 +86,9 @@ describe("Neo4jConfig", () => {
 				password: "password",
 			};
 
-			expect(() => validateConfig(config)).toThrow("url is required and must be a string");
+			expect(() => validateConfig(config)).toThrow(
+				"url is required and must be a string",
+			);
 		});
 
 		it("should throw error for missing user", () => {
@@ -89,7 +97,9 @@ describe("Neo4jConfig", () => {
 				password: "password",
 			};
 
-			expect(() => validateConfig(config)).toThrow("user is required and must be a string");
+			expect(() => validateConfig(config)).toThrow(
+				"user is required and must be a string",
+			);
 		});
 
 		it("should throw error for invalid user type", () => {
@@ -99,7 +109,9 @@ describe("Neo4jConfig", () => {
 				password: "password",
 			};
 
-			expect(() => validateConfig(config)).toThrow("user is required and must be a string");
+			expect(() => validateConfig(config)).toThrow(
+				"user is required and must be a string",
+			);
 		});
 
 		it("should throw error for missing password", () => {
@@ -108,7 +120,9 @@ describe("Neo4jConfig", () => {
 				user: "neo4j",
 			};
 
-			expect(() => validateConfig(config)).toThrow("password is required and must be a string");
+			expect(() => validateConfig(config)).toThrow(
+				"password is required and must be a string",
+			);
 		});
 
 		it("should throw error for invalid password type", () => {
@@ -118,7 +132,9 @@ describe("Neo4jConfig", () => {
 				password: 123,
 			};
 
-			expect(() => validateConfig(config)).toThrow("password is required and must be a string");
+			expect(() => validateConfig(config)).toThrow(
+				"password is required and must be a string",
+			);
 		});
 
 		it("should accept negative timeout for now", () => {

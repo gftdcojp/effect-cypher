@@ -7,26 +7,26 @@
  * Provides type-safe validation for Neo4j driver configuration
  */
 export interface Neo4jConfig {
-  /** Neo4j server URL (e.g., "neo4j://localhost:7687") */
-  url: string;
+	/** Neo4j server URL (e.g., "neo4j://localhost:7687") */
+	url: string;
 
-  /** Database username */
-  user: string;
+	/** Database username */
+	user: string;
 
-  /** Database password */
-  password: string;
+	/** Database password */
+	password: string;
 
-  /** Target database name (optional, defaults to "neo4j") */
-  database: string | undefined;
+	/** Target database name (optional, defaults to "neo4j") */
+	database: string | undefined;
 
-  /** Default query timeout in milliseconds */
-  defaultTimeoutMs: number | undefined;
+	/** Default query timeout in milliseconds */
+	defaultTimeoutMs: number | undefined;
 
-  /** Connection pool configuration */
-  connectionPoolSize: number | undefined;
+	/** Connection pool configuration */
+	connectionPoolSize: number | undefined;
 
-  /** Maximum connection lifetime in milliseconds */
-  maxConnectionLifetimeMs: number | undefined;
+	/** Maximum connection lifetime in milliseconds */
+	maxConnectionLifetimeMs: number | undefined;
 }
 
 /**
@@ -53,9 +53,18 @@ export const validateConfig = (config: unknown): Neo4jConfig => {
 		user: obj.user,
 		password: obj.password,
 		database: typeof obj.database === "string" ? obj.database : undefined,
-		defaultTimeoutMs: typeof obj.defaultTimeoutMs === "number" ? obj.defaultTimeoutMs : undefined,
-		connectionPoolSize: typeof obj.connectionPoolSize === "number" ? obj.connectionPoolSize : undefined,
-		maxConnectionLifetimeMs: typeof obj.maxConnectionLifetimeMs === "number" ? obj.maxConnectionLifetimeMs : undefined,
+		defaultTimeoutMs:
+			typeof obj.defaultTimeoutMs === "number"
+				? obj.defaultTimeoutMs
+				: undefined,
+		connectionPoolSize:
+			typeof obj.connectionPoolSize === "number"
+				? obj.connectionPoolSize
+				: undefined,
+		maxConnectionLifetimeMs:
+			typeof obj.maxConnectionLifetimeMs === "number"
+				? obj.maxConnectionLifetimeMs
+				: undefined,
 	};
 };
 

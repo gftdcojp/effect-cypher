@@ -70,7 +70,6 @@ describe("DomainError", () => {
 		});
 	});
 
-
 	describe("ConstraintError", () => {
 		it("should create a ConstraintError with constraint details", () => {
 			const constraint = "unique_person_id";

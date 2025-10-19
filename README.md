@@ -217,6 +217,199 @@ try {
 }
 ```
 
+## 🔬 AST IR and Deterministic Compilation
+
+effect-cypher now provides a first-class AST (Abstract Syntax Tree) IR for building and normalizing queries:
+
+```typescript
+import {
+  query,
+  matchClause,
+  whereClause,
+  returnClause,
+  node,
+  binaryOp,
+  property,
+  param,
+  normalize,
+  compile,
+  astHash
+} from "effect-cypher";
+
+// Build query using AST
+const q = query(
+  [
+    matchClause(node("person", ["Person"])),
+    whereClause(binaryOp(">=", property("person", "age"), param("minAge"))),
+    returnClause([{ _tag: "Variable", name: "person" }])
+  ],
+  { minAge: 18 }
+);
+
+// Normalize for deterministic output
+const normalized = normalize(q);
+
+// Compile to Cypher (always produces same output for same normalized AST)
+const result = compile(normalized);
+console.log(result.cypher);
+// MATCH (person:Person) WHERE person.age >= $minAge RETURN person
+
+// Generate stable hash for caching/monitoring
+const hash = astHash(normalized);
+console.log(hash); // "a3f2b91c"
+```
+
+### Benefits
+
+- **Deterministic**: Same normalized AST always produces identical Cypher
+- **Algebraic Normalization**: Applies commutativity, associativity, double negation elimination
+- **Cacheable**: Use AST hash as cache key
+- **Testable**: Snapshot tests guarantee stable output
+
+## 🏷️ Branded Types for Type Safety
+
+Prevent value confusion with branded IDs and unit types:
+
+```typescript
+import { createNodeID, ms, seconds, secondsToMs, type NodeID } from "effect-cypher";
+
+// Branded node IDs prevent mixing IDs from different domains
+type PersonID = NodeID<"Person">;
+type PostID = NodeID<"Post">;
+
+const personId = createNodeID("Person", "person-123");
+const postId = createNodeID("Post", "post-456");
+
+// TypeScript prevents this:
+// const wrong: PersonID = postId; // ❌ Type error!
+
+// Unit-typed numbers prevent confusion
+const timeout = ms(5000);
+const delay = seconds(3);
+
+// TypeScript prevents this:
+// const mixed: Ms = delay; // ❌ Type error!
+
+// Safe conversions
+const timeoutInSeconds = msToSeconds(timeout);
+```
+
+## 📊 Observability and Monitoring
+
+Track query performance with structured logging and metrics:
+
+```typescript
+import {
+  LatencyTracker,
+  createQueryMetrics,
+  ConsoleQueryLogger
+} from "effect-cypher";
+
+// Track latency percentiles
+const tracker = new LatencyTracker();
+tracker.record(120);
+tracker.record(145);
+tracker.record(98);
+
+const stats = tracker.getStats();
+console.log(`P50: ${stats.p50}ms, P95: ${stats.p95}ms, P99: ${stats.p99}ms`);
+
+// Log query execution with metrics
+const logger = new ConsoleQueryLogger();
+const metrics = createQueryMetrics(
+  query,
+  "MATCH (n) RETURN n",
+  123,
+  0,
+  "plan-digest-abc"
+);
+logger.log(metrics);
+// [Query] { astHash: "a3f2b91c", durationMs: 123, retries: 0, ... }
+```
+
+## 🔄 Effect Policies
+
+Execute queries with retry, timeout, and circuit breaker policies:
+
+```typescript
+import * as Effect from "effect/Effect";
+import {
+  executeWithPolicies,
+  retrySchedules,
+  withCircuitBreaker,
+  withIdempotency
+} from "effect-cypher";
+
+// Execute with timeout and retry
+const program = executeWithPolicies(
+  session,
+  query,
+  async (s, q) => runQuery(s, q.cypher, q.params),
+  {
+    timeoutMs: 5000,
+    retrySchedule: retrySchedules.exponential(3),
+    circuitBreakerName: "neo4j-queries",
+    idempotencyKey: "unique-operation-id"
+  }
+);
+
+// Run with Effect
+Effect.runPromise(program).then(results => {
+  console.log("Query succeeded:", results);
+});
+
+// Use circuit breaker for fault tolerance
+const protectedQuery = withCircuitBreaker(
+  Effect.promise(() => session.run("MATCH (n) RETURN n")),
+  "neo4j-main"
+);
+```
+
+## ✅ Invariant Checking
+
+Define and validate graph invariants (∀∃ constraints):
+
+```typescript
+import {
+  forAllExistsUnique,
+  allNodesHaveProperty,
+  propertyIsUnique,
+  runInvariantsOrFail,
+  exampleInvariants
+} from "effect-cypher";
+
+// Define custom invariants
+const postHasAuthor = forAllExistsUnique(
+  "Post has unique author",
+  "Post",
+  "AUTHORED",
+  "Person"
+);
+
+const personHasName = allNodesHaveProperty(
+  "Person has name",
+  "Person",
+  "name"
+);
+
+const personIdUnique = propertyIsUnique(
+  "Person ID is unique",
+  "Person",
+  "id"
+);
+
+// Run invariants (exits with error if any fail)
+await runInvariantsOrFail(session, [
+  postHasAuthor,
+  personHasName,
+  personIdUnique
+]);
+// ✅ All invariant checks passed
+//   ✓ Post has unique author
+//   ✓ Person has name
+//   ✓ Person ID is unique
+```
+
 ## 🧪 Testing
 
 ```bash

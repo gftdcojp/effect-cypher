@@ -1,12 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as Schema from "effect/Schema";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-	runQuery,
-	runQuerySingle,
-	runQueryRaw,
-	runWriteQuery,
+	QueryError,
 	runBatchQueries,
-	QueryError
+	runQuery,
+	runQueryRaw,
+	runQuerySingle,
+	runWriteQuery,
 } from "../../src/cypher/CypherService";
 import { ValidationError } from "../../src/errors/DomainError";
 
@@ -38,7 +38,12 @@ describe("CypherService", () => {
 				name: Schema.String,
 			});
 
-			const result = await runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder);
+			const result = await runQuery(
+				mockSession,
+				"MATCH (n) RETURN n",
+				{},
+				decoder,
+			);
 
 			expect(mockSession.run).toHaveBeenCalledWith("MATCH (n) RETURN n", {});
 			expect(mockRecord.get).toHaveBeenCalledWith(0);
@@ -55,10 +60,12 @@ describe("CypherService", () => {
 				name: Schema.String,
 			});
 
-			await expect(runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder))
-				.rejects.toThrow(ValidationError);
-			await expect(runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder))
-				.rejects.toThrow("Query returned null or undefined value");
+			await expect(
+				runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder),
+			).rejects.toThrow(ValidationError);
+			await expect(
+				runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder),
+			).rejects.toThrow("Query returned null or undefined value");
 		});
 
 		it("should handle decoder errors when ValidationError occurs", async () => {
@@ -71,10 +78,12 @@ describe("CypherService", () => {
 				id: Schema.Number, // This will fail because rawData.id is a string, not number
 			});
 
-			await expect(runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder))
-				.rejects.toThrow(ValidationError);
-			await expect(runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder))
-				.rejects.toThrow("Failed to decode query result");
+			await expect(
+				runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder),
+			).rejects.toThrow(ValidationError);
+			await expect(
+				runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder),
+			).rejects.toThrow("Failed to decode query result");
 		});
 
 		it("should handle session run errors", async () => {
@@ -83,10 +92,12 @@ describe("CypherService", () => {
 
 			const decoder = vi.fn();
 
-			await expect(runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder))
-				.rejects.toThrow(QueryError);
-			await expect(runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder))
-				.rejects.toThrow("Cypher query execution failed");
+			await expect(
+				runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder),
+			).rejects.toThrow(QueryError);
+			await expect(
+				runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder),
+			).rejects.toThrow("Cypher query execution failed");
 		});
 
 		it("should handle empty records", async () => {
@@ -95,7 +106,12 @@ describe("CypherService", () => {
 
 			const decoder = vi.fn();
 
-			const result = await runQuery(mockSession, "MATCH (n) RETURN n", {}, decoder);
+			const result = await runQuery(
+				mockSession,
+				"MATCH (n) RETURN n",
+				{},
+				decoder,
+			);
 
 			expect(result).toEqual([]);
 		});
@@ -112,7 +128,12 @@ describe("CypherService", () => {
 				name: Schema.String,
 			});
 
-			const result = await runQuerySingle(mockSession, "MATCH (n) RETURN n LIMIT 1", {}, decoder);
+			const result = await runQuerySingle(
+				mockSession,
+				"MATCH (n) RETURN n LIMIT 1",
+				{},
+				decoder,
+			);
 
 			expect(result).toEqual(rawData);
 		});
@@ -123,12 +144,13 @@ describe("CypherService", () => {
 
 			const decoder = vi.fn();
 
-			await expect(runQuerySingle(mockSession, "MATCH (n) RETURN n LIMIT 1", {}, decoder))
-				.rejects.toThrow(QueryError);
-			await expect(runQuerySingle(mockSession, "MATCH (n) RETURN n LIMIT 1", {}, decoder))
-				.rejects.toThrow("Query returned no results");
+			await expect(
+				runQuerySingle(mockSession, "MATCH (n) RETURN n LIMIT 1", {}, decoder),
+			).rejects.toThrow(QueryError);
+			await expect(
+				runQuerySingle(mockSession, "MATCH (n) RETURN n LIMIT 1", {}, decoder),
+			).rejects.toThrow("Query returned no results");
 		});
-
 
 		it("should throw error for multiple results", async () => {
 			const rawData = { id: "test", name: "Test User" };
@@ -141,10 +163,12 @@ describe("CypherService", () => {
 				name: Schema.String,
 			});
 
-			await expect(runQuerySingle(mockSession, "MATCH (n) RETURN n", {}, decoder))
-				.rejects.toThrow(QueryError);
-			await expect(runQuerySingle(mockSession, "MATCH (n) RETURN n", {}, decoder))
-				.rejects.toThrow("Query returned multiple results, expected one");
+			await expect(
+				runQuerySingle(mockSession, "MATCH (n) RETURN n", {}, decoder),
+			).rejects.toThrow(QueryError);
+			await expect(
+				runQuerySingle(mockSession, "MATCH (n) RETURN n", {}, decoder),
+			).rejects.toThrow("Query returned multiple results, expected one");
 		});
 	});
 
@@ -152,9 +176,13 @@ describe("CypherService", () => {
 		it("should execute raw query", async () => {
 			mockSession.run.mockResolvedValue(mockResult);
 
-			const result = await runQueryRaw(mockSession, "MATCH (n) RETURN n", { param: "value" });
+			const result = await runQueryRaw(mockSession, "MATCH (n) RETURN n", {
+				param: "value",
+			});
 
-			expect(mockSession.run).toHaveBeenCalledWith("MATCH (n) RETURN n", { param: "value" });
+			expect(mockSession.run).toHaveBeenCalledWith("MATCH (n) RETURN n", {
+				param: "value",
+			});
 			expect(result).toBe(mockResult);
 		});
 
@@ -162,8 +190,9 @@ describe("CypherService", () => {
 			const error = new Error("Raw query failed");
 			mockSession.run.mockRejectedValue(error);
 
-			await expect(runQueryRaw(mockSession, "MATCH (n) RETURN n", {}))
-				.rejects.toThrow(error);
+			await expect(
+				runQueryRaw(mockSession, "MATCH (n) RETURN n", {}),
+			).rejects.toThrow(error);
 		});
 	});
 
@@ -193,8 +222,14 @@ describe("CypherService", () => {
 			const batchResult = await runBatchQueries(mockSession, queries);
 
 			expect(mockSession.run).toHaveBeenCalledTimes(2);
-			expect(mockSession.run).toHaveBeenNthCalledWith(1, "MATCH (n) RETURN n", {});
-			expect(mockSession.run).toHaveBeenNthCalledWith(2, "CREATE (n:Node)", { id: "test" });
+			expect(mockSession.run).toHaveBeenNthCalledWith(
+				1,
+				"MATCH (n) RETURN n",
+				{},
+			);
+			expect(mockSession.run).toHaveBeenNthCalledWith(2, "CREATE (n:Node)", {
+				id: "test",
+			});
 			expect(batchResult).toEqual(results);
 		});
 
@@ -204,7 +239,9 @@ describe("CypherService", () => {
 
 			const queries = [{ cypher: "MATCH (n) RETURN n", params: {} }];
 
-			await expect(runBatchQueries(mockSession, queries)).rejects.toThrow(error);
+			await expect(runBatchQueries(mockSession, queries)).rejects.toThrow(
+				error,
+			);
 		});
 
 		it("should handle empty query batch", async () => {
