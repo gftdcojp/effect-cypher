@@ -31,6 +31,7 @@ export * from "./ast/Compile";
 
 // Branded Types
 export * from "./types/BrandedTypes";
+export * from "./types/SchemaAdjacency";
 
 // Observability
 export * from "./observability/ASTHash";

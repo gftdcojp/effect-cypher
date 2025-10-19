@@ -78,24 +78,3 @@ export const isNodeID = <L extends string>(
 ): value is NodeID<L> => {
 	return typeof value === "string";
 };
-
-/**
- * Schema adjacency types for type-safe graph traversal
- */
-export interface AdjacencyMap {
-	// Example: Person can have KNOWS relation to Person and AUTHORED relation to Post
-	// Person: { KNOWS: "Person"; AUTHORED: "Post" };
-	// Post: { WRITTEN_BY: "Person" };
-}
-
-/**
- * Type-safe hop function that enforces adjacency constraints
- * Only allows traversing relationships that exist in the schema
- */
-export type ValidRelationship<From extends keyof AdjacencyMap> =
-	keyof AdjacencyMap[From];
-
-export type TargetLabel<
-	From extends keyof AdjacencyMap,
-	Rel extends ValidRelationship<From>,
-> = AdjacencyMap[From][Rel];
