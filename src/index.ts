@@ -23,3 +23,20 @@ export {
   isDomainError,
   isDomainErrorOf,
 } from "./errors/DomainError";
+
+// AST and Compilation
+export * from "./ast/CypherAST";
+export * from "./ast/Normalize";
+export * from "./ast/Compile";
+
+// Branded Types
+export * from "./types/BrandedTypes";
+
+// Observability
+export * from "./observability/ASTHash";
+
+// Policies
+export * from "./policies/QueryPolicies";
+
+// Invariants
+export * from "./invariants/InvariantChecker";

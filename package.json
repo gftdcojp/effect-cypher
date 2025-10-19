@@ -18,7 +18,10 @@
 		"lint:fix": "biome check --write .",
 		"format": "biome format --write .",
 		"clean": "rm -rf dist",
-		"prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test"
+		"prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test",
+		"invariants:example": "node -e \"console.log('Run invariant checks against your Neo4j database')\"",
+		"plan:record": "ts-node tools/plan-drift-detector.ts record",
+		"plan:diff": "ts-node tools/plan-drift-detector.ts diff"
 	},
 	"keywords": [
 		"neo4j",
@@ -42,6 +45,8 @@
 		"@biomejs/biome": "^1.8.0",
 		"@types/node": "^20.0.0",
 		"effect": "^3.0.0",
+		"fast-check": "^3.0.0",
+		"ts-node": "^10.0.0",
 		"typescript": "^5.0.0",
 		"vitest": "^1.0.0",
 		"@vitest/coverage-v8": "^1.0.0"
